@@ -1,3 +1,3 @@
-# iPhone 14 Landing Page Mockup
+# iPhone Product Page Mockup
 
-## Creating a 3d model landing page for the iPhone 14 using React, WebGi (powered by Three.js), and GSAP.
+### Creating a landing page for the new iPhone using React, WebGi (powered by Three.js), and GSAP.
