@@ -1,6 +1,18 @@
 import React from 'react'
 
 const SoundSection = () => {
+
+  const handleLearnMore = () => {
+    //need to get reference to the last section
+    const element = document.querySelector('.display-section');
+
+    window.scrollTo({
+      top: element?.getBoundingClientRect().bottom,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }
+
   return (
     <div className='sound-section wrapper'>
       <div className='body'>
@@ -25,7 +37,7 @@ const SoundSection = () => {
             </li>
 
             <li>
-              <a className='link'>
+              <a className='link' onClick={handleLearnMore}>
                 Learn more
               </a>
             </li>
