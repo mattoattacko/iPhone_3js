@@ -35,10 +35,20 @@ const WebgiViewer = forwardRef((props, ref) => {
   const [targetRef, setTargetRef] = useState(null)
   const [cameraRef, setCameraRef] = useState(null)
   const [positionRef, setPositionRef] = useState(null)
+  const canvasContainerRef = useRef(null);
+
+  const [previewMode, setPreviewMode] = useState(false);  //this is used to determine if we are in preview mode or not so that we can close it out
+
+  //check if we are on a mobile device
+  const [isMobile, setIsMobile] = useState(null)
 
   //useImperativeHandle lets us expose the canvasRef to the parent component
   useImperativeHandle(ref, () => ({
     triggerPreview() {
+      setPreviewMode(true);
+      canvasContainerRef.current.style.pointerEvents = 'all'; //allows us to interact with the canvas
+      props.contentRef.current.style.opacity = '0';
+
       gsap.to(positionRef, {
         x: 13.04,
         y: -2.01,
@@ -56,14 +66,17 @@ const WebgiViewer = forwardRef((props, ref) => {
         z: 0.0,
         duration: 2,
       })
-    }
+
+      // set and enable the 3d model to be rotated
+      viewerRef.scene.activeCamera.setCameraOptions({ controlsEnabled: true });
+    },
   }));
 
   //using a callback to cache and memoize so we dont recreate the animation function on every render
-  const memoizedScrollAnimation = useCallback((position, target, onUpdate) => {
+  const memoizedScrollAnimation = useCallback((position, target, isMobile, onUpdate) => {
     //check if the position, target, onUpdate exist
-    if(position, target, onUpdate) {
-      scrollAnimation(position, target, onUpdate);
+    if (position && target && onUpdate) {
+      scrollAnimation(position, target, isMobile, onUpdate);
     }
   }, []);
 
@@ -74,6 +87,10 @@ const WebgiViewer = forwardRef((props, ref) => {
     })
 
     setViewerRef(viewer);//set the viewerRef to the viewer
+
+    // check if mobile
+    const isMobileOrTablet = mobileAndTabletCheck();
+    setIsMobile(isMobileOrTablet);
 
     // Add some plugins
     const manager = await viewer.addPlugin(AssetManagerPlugin)
@@ -108,6 +125,13 @@ const WebgiViewer = forwardRef((props, ref) => {
     // disable controls once we load the viewer
     viewer.scene.activeCamera.setCameraOptions({ controlsEnabled: false });
 
+    //if it is a mobile device
+    if (isMobileOrTablet) {
+      position.set(-16.7, 1.17, 11.7);
+      target.set(0, 1.37, 0);
+      props.contentRef.current.className = 'mobile-or-tablet'; //using this class we will hide elements that are not needed on mobile
+    }
+
     // whenever we reload the website, we want the position to be on top
     window.scrollTo(0, 0);
 
@@ -128,7 +152,7 @@ const WebgiViewer = forwardRef((props, ref) => {
       }
     });
 
-    memoizedScrollAnimation(position, target, onUpdate);
+    memoizedScrollAnimation(position, target, onUpdate, isMobileOrTablet);
   }, []);
 
   // Run setupViewer once when the component is mounted
@@ -136,13 +160,64 @@ const WebgiViewer = forwardRef((props, ref) => {
     setupViewer();
   }, []);
 
+  // EXIT BUTTON //
+  //when the user clicks the exit button, we want to exit the preview mode
+  const handleExit = useCallback(() => {
+    canvasContainerRef.current.style.pointerEvents = 'none';
+    props.contentRef.current.style.opacity = '1';
+    viewerRef.scene.activeCamera.setCameraOptions({ controlsEnabled: false });
+    setPreviewMode(false);
+
+    // reposition the iphone back to its OG position
+    gsap
+      .to(positionRef, {
+        x: !isMobile ? 1.56 : 9.36,
+        y: !isMobile ? 5.0 : 10.95,
+        z: !isMobile ? 0.01 : 0.09,
+        scrollTrigger: {
+          trigger: '.display-section',
+          start: 'top bottom',
+          end: 'top top',
+          scrub: 2,
+          immediateRender: false,
+        },
+        onUpdate: () => {
+          viewerRef.setDirty(); //basically just means the camera and the viewer need to be updated
+          cameraRef.positionTargetUpdated(true); //position of the target has been updated
+        },
+      });
+    gsap.to(targetRef, {
+      x: !isMobile ? -0.55 : -1.62,
+      y: !isMobile ? 0.32 : 0.02,
+      z: !isMobile ? 0.0 : -0.06,
+      scrollTrigger: {
+        trigger: '.display-section',
+        start: 'top bottom',
+        end: 'top top',
+        scrub: 2,
+        immediateRender: false,
+      },
+    })
+  }, [canvasContainerRef, viewerRef, positionRef, cameraRef, targetRef]);
 
   return (
-    <div id='webgi-canvas-container'>
+    <div
+      id='webgi-canvas-container'
+      ref={canvasContainerRef}
+    >
       <canvas
         id='webgi-canvas'
         ref={canvasRef}
       />
+      {/* if we are in preview mode, click the button to exit */}
+      {previewMode && (
+        <button
+          className='button'
+          onClick={handleExit}
+        >
+          Exit
+        </button>
+      )}
     </div>
   )
 })

@@ -4,10 +4,12 @@ import Jumbotron from './components/Jumbotron';
 import SoundSection from './components/SoundSection';
 import DisplaySection from './components/DisplaySection';
 import WebgiViewer from './components/WebgiViewer';
+import Loader from './components/Loader';
 
 function App() {
 
   const webgiViewerRef = useRef();
+  const contentRef = useRef();
 
   const handlePreview = () => {
     webgiViewerRef.current.triggerPreview();
@@ -15,11 +17,19 @@ function App() {
 
   return (
     <div className="App">
-      <Nav />
-      <Jumbotron />
-      <SoundSection />
-      <DisplaySection triggerPreview={handlePreview} />
-      <WebgiViewer ref={webgiViewerRef} />
+      <Loader />
+      {/* we put everything in a div so that we can hide things when doing the model display */}
+      <div
+        ref={contentRef}
+        id='content'
+      >
+        <Nav />
+        <Jumbotron />
+        <SoundSection />
+        <DisplaySection triggerPreview={handlePreview} />
+      </div>
+
+      <WebgiViewer ref={webgiViewerRef} contentRef={contentRef} />
     </div>
   );
 }
