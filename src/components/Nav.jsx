@@ -9,70 +9,78 @@ const Nav = () => {
       <div className="nav-content">
         <ul className="list-styled">
           <li>
-            <img 
+            <img
               src={Logo}
               alt='Apple Logo'
             />
           </li>
           <li>
-            <a className="link-styled">
+            <a
+              className="link-styled"
+              // href="https://mattmcquain.com"
+              // target='_blank'
+            >
               Store
             </a>
-          </li>          
+          </li>
           <li>
-            <a className="link-styled">
+            <a
+              className="link-styled"
+              // href="https://mattmcquain.com"
+              // target='_blank'
+            >
               Mac
             </a>
-          </li>          
+          </li>
           <li>
             <a className="link-styled">
               iPad
             </a>
-          </li>          
+          </li>
           <li>
             <a className="link-styled">
               iPhone
             </a>
-          </li>          
+          </li>
           <li>
             <a className="link-styled">
               Watch
             </a>
-          </li>          
+          </li>
           <li>
             <a className="link-styled">
               AirPods
             </a>
-          </li>          
+          </li>
           <li>
             <a className="link-styled">
               TV & Home
             </a>
-          </li>          
+          </li>
           <li>
             <a className="link-styled">
               Entertainment
             </a>
-          </li>          
+          </li>
           <li>
             <a className="link-styled">
               Accessories
             </a>
-          </li>          
+          </li>
           <li>
             <a className="link-styled">
               Support
             </a>
-          </li>     
+          </li>
 
           <li>
-            <img 
+            <img
               src={Search}
               alt='Search Icon'
             />
-          </li>          
+          </li>
           <li>
-            <img 
+            <img
               src={Store}
               alt='Store Icon'
             />
