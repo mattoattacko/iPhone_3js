@@ -7,7 +7,6 @@ import WebgiViewer from './components/WebgiViewer';
 import Loader from './components/Loader';
 
 function App() {
-
   const webgiViewerRef = useRef();
   const contentRef = useRef();
 

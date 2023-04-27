@@ -5,7 +5,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useEffect
-} from 'react' //useRef hook gets us the reference to an HTML element and then lets us do DOM manipulation on the reference.
+} from 'react'; //useRef hook gets us the reference to an HTML element and then lets us do DOM manipulation on the reference.
 
 import {
   ViewerApp,
@@ -19,7 +19,6 @@ import {
   GammaCorrectionPlugin,
   mobileAndTabletCheck,
 } from "webgi";
-
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { scrollAnimation } from '../lib/scroll-animation';
@@ -29,18 +28,16 @@ import { scrollAnimation } from '../lib/scroll-animation';
 gsap.registerPlugin(ScrollTrigger);
 
 const WebgiViewer = forwardRef((props, ref) => {
-
-  const canvasRef = useRef(null);
-  const [viewerRef, setViewerRef] = useState(null)
-  const [targetRef, setTargetRef] = useState(null)
-  const [cameraRef, setCameraRef] = useState(null)
-  const [positionRef, setPositionRef] = useState(null)
-  const canvasContainerRef = useRef(null);
-
-  const [previewMode, setPreviewMode] = useState(false);  //this is used to determine if we are in preview mode or not so that we can close it out
-
+  
+  const [viewerRef, setViewerRef] = useState(null);
+  const [targetRef, setTargetRef] = useState(null);
+  const [cameraRef, setCameraRef] = useState(null);
+  const [positionRef, setPositionRef] = useState(null);
   //check if we are on a mobile device
-  const [isMobile, setIsMobile] = useState(null)
+  const [isMobile, setIsMobile] = useState(null);
+  const [previewMode, setPreviewMode] = useState(false);  //this is used to determine if we are in preview mode or not so that we can close it out
+  const canvasRef = useRef(null);
+  const canvasContainerRef = useRef(null);
 
   //useImperativeHandle lets us expose the canvasRef to the parent component
   useImperativeHandle(ref, () => ({
@@ -57,15 +54,9 @@ const WebgiViewer = forwardRef((props, ref) => {
         onUpdate: () => {
           viewerRef.setDirty(); //basically just means the camera and the viewer need to be updated
           cameraRef.positionTargetUpdated(true); //position of the target has been updated
-        }
+        },
       });
-
-      gsap.to(targetRef, {
-        x: 0.11,
-        y: 0.0,
-        z: 0.0,
-        duration: 2,
-      })
+      gsap.to(targetRef, { x: 0.11, y: 0.0, z: 0.0, duration: 2 });
 
       // set and enable the 3d model to be rotated
       viewerRef.scene.activeCamera.setCameraOptions({ controlsEnabled: true });
@@ -84,7 +75,7 @@ const WebgiViewer = forwardRef((props, ref) => {
     // Initialize the viewer
     const viewer = new ViewerApp({
       canvas: canvasRef.current,
-    })
+    });
 
     setViewerRef(viewer);//set the viewerRef to the viewer
 
@@ -93,7 +84,7 @@ const WebgiViewer = forwardRef((props, ref) => {
     setIsMobile(isMobileOrTablet);
 
     // Add some plugins
-    const manager = await viewer.addPlugin(AssetManagerPlugin)
+    const manager = await viewer.addPlugin(AssetManagerPlugin);
 
     //get active camera
     // allows us to access the position and the target of the camera
@@ -102,21 +93,21 @@ const WebgiViewer = forwardRef((props, ref) => {
     const target = camera.target;
     //changing the view target and position is what gives us the 3d rotation effect
 
-    setCameraRef(camera);
-    setPositionRef(position);
     setTargetRef(target);
+    setPositionRef(position);
+    setCameraRef(camera);
 
     // Add plugins individually.
-    await viewer.addPlugin(GBufferPlugin)
-    await viewer.addPlugin(new ProgressivePlugin(32))
-    await viewer.addPlugin(new TonemapPlugin(true))
-    await viewer.addPlugin(GammaCorrectionPlugin)
-    await viewer.addPlugin(SSRPlugin)
-    await viewer.addPlugin(SSAOPlugin)
-    await viewer.addPlugin(BloomPlugin)
+    await viewer.addPlugin(GBufferPlugin);
+    await viewer.addPlugin(new ProgressivePlugin(32));
+    await viewer.addPlugin(new TonemapPlugin(true));
+    await viewer.addPlugin(GammaCorrectionPlugin);
+    await viewer.addPlugin(SSRPlugin);
+    await viewer.addPlugin(SSAOPlugin);
+    await viewer.addPlugin(BloomPlugin);
 
     // This must be called once after all plugins are added.
-    viewer.renderer.refreshPipeline()
+    viewer.renderer.refreshPipeline();
 
     await manager.addFromPath("scene-black.glb");
 
@@ -132,18 +123,19 @@ const WebgiViewer = forwardRef((props, ref) => {
       props.contentRef.current.className = 'mobile-or-tablet'; //using this class we will hide elements that are not needed on mobile
     }
 
-    // whenever we reload the website, we want the position to be on top
-    window.scrollTo(0, 0);
 
-    // only update the position and target under certain conditions
-    let needsUpdate = true;
+
+
 
     // update camera view
     const onUpdate = () => {
       needsUpdate = true;
       viewer.setDirty(); //basically just means the camera and the viewer need to be updated
-    }
-
+    };
+    // whenever we reload the website, we want the position to be on top
+    window.scrollTo(0, 0);
+    // only update the position and target under certain conditions
+    let needsUpdate = true;
     // add a listener to update the camera position and target
     viewer.addEventListener('preFrame', () => {
       if (needsUpdate) {
@@ -152,7 +144,7 @@ const WebgiViewer = forwardRef((props, ref) => {
       }
     });
 
-    memoizedScrollAnimation(position, target, onUpdate, isMobileOrTablet);
+    memoizedScrollAnimation(position, target, isMobileOrTablet, onUpdate);
   }, []);
 
   // Run setupViewer once when the component is mounted
@@ -164,23 +156,21 @@ const WebgiViewer = forwardRef((props, ref) => {
   //when the user clicks the exit button, we want to exit the preview mode
   const handleExit = useCallback(() => {
     canvasContainerRef.current.style.pointerEvents = 'none';
-    props.contentRef.current.style.opacity = '1';
+    
     viewerRef.scene.activeCamera.setCameraOptions({ controlsEnabled: false });
-    setPreviewMode(false);
-
+    props.contentRef.current.style.opacity = '1';
     // reposition the iphone back to its OG position
-    gsap
-      .to(positionRef, {
+    gsap.to(positionRef, {
         x: !isMobile ? 1.56 : 9.36,
         y: !isMobile ? 5.0 : 10.95,
         z: !isMobile ? 0.01 : 0.09,
-        scrollTrigger: {
-          trigger: '.display-section',
-          start: 'top bottom',
-          end: 'top top',
-          scrub: 2,
-          immediateRender: false,
-        },
+        // scrollTrigger: {
+        //   trigger: '.display-section',
+        //   start: 'top bottom',
+        //   end: 'top top',
+        //   scrub: 2,
+        //   immediateRender: false,
+        // },
         onUpdate: () => {
           viewerRef.setDirty(); //basically just means the camera and the viewer need to be updated
           cameraRef.positionTargetUpdated(true); //position of the target has been updated
@@ -190,16 +180,28 @@ const WebgiViewer = forwardRef((props, ref) => {
       x: !isMobile ? -0.55 : -1.62,
       y: !isMobile ? 0.32 : 0.02,
       z: !isMobile ? 0.0 : -0.06,
-      scrollTrigger: {
-        trigger: '.display-section',
-        start: 'top bottom',
-        end: 'top top',
-        scrub: 2,
-        immediateRender: false,
-      },
-    })
+      // scrollTrigger: {
+      //   trigger: '.display-section',
+      //   start: 'top bottom',
+      //   end: 'top top',
+      //   scrub: 2,
+      //   immediateRender: false,
+      // },
+    });
+
+    setPreviewMode(false);
   }, [canvasContainerRef, viewerRef, positionRef, cameraRef, targetRef]);
 
+  const setupCamera = useCallback(() => {
+    const camera = viewerRef.scene.activeCamera;
+    const position = camera.position;
+    const target = camera.target;
+  
+    setTargetRef(target);
+    setPositionRef(position);
+    setCameraRef(camera);
+  }, [viewerRef]);
+  
   return (
     <div
       id='webgi-canvas-container'
@@ -219,9 +221,9 @@ const WebgiViewer = forwardRef((props, ref) => {
         </button>
       )}
     </div>
-  )
-})
+  );
+});
 
-export default WebgiViewer
+export default WebgiViewer;
 
 //we need to use gsap to change the position of the camera
